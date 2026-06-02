@@ -1,7 +1,7 @@
 import { Combobox } from "@kobalte/core/combobox"
-import { createEffect, createMemo } from "solid-js"
+import { Show, createEffect, createMemo } from "solid-js"
 import { providers, fetchProviders } from "../stores/sessions"
-import { ChevronDown } from "lucide-solid"
+import { Brain, ChevronDown } from "lucide-solid"
 import { getLogger } from "../lib/logger"
 import { getModelThinkingSelection, setModelThinkingSelection } from "../stores/preferences"
 import { useI18n } from "../lib/i18n"
@@ -11,6 +11,7 @@ const log = getLogger("session")
 interface ThinkingSelectorProps {
   instanceId: string
   currentModel: { providerId: string; modelId: string }
+  triggerVariant?: "default" | "icon"
 }
 
 type ThinkingOption = {
@@ -22,6 +23,7 @@ type ThinkingOption = {
 export default function ThinkingSelector(props: ThinkingSelectorProps) {
   const { t } = useI18n()
   const instanceProviders = () => providers().get(props.instanceId) || []
+  const compactTrigger = () => props.triggerVariant === "icon"
 
   createEffect(() => {
     if (instanceProviders().length === 0) {
@@ -88,13 +90,22 @@ export default function ThinkingSelector(props: ThinkingSelectorProps) {
       >
         <Combobox.Control class="relative w-full" data-thinking-selector-control>
           <Combobox.Input class="sr-only" data-thinking-selector />
-          <Combobox.Trigger class="selector-trigger">
-            <div class="selector-trigger-label selector-trigger-label--stacked flex-1 min-w-0">
+          <Combobox.Trigger
+            class={compactTrigger() ? "selector-trigger selector-trigger--prompt-icon" : "selector-trigger"}
+            aria-label={triggerPrimary()}
+            title={triggerPrimary()}
+          >
+            <Show when={compactTrigger()}>
+              <Brain class="w-4 h-4" aria-hidden="true" />
+            </Show>
+            <div class={compactTrigger() ? "sr-only" : "selector-trigger-label selector-trigger-label--stacked flex-1 min-w-0"}>
               <span class="selector-trigger-primary selector-trigger-primary--align-left">{triggerPrimary()}</span>
             </div>
-            <Combobox.Icon class="selector-trigger-icon">
-              <ChevronDown class="w-3 h-3" />
-            </Combobox.Icon>
+            <Show when={!compactTrigger()}>
+              <Combobox.Icon class="selector-trigger-icon">
+                <ChevronDown class="w-3 h-3" />
+              </Combobox.Icon>
+            </Show>
           </Combobox.Trigger>
         </Combobox.Control>
 

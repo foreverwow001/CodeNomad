@@ -1,5 +1,5 @@
 import { Show, createEffect, createMemo, createSignal, onCleanup, on, untrack } from "solid-js"
-import { ChevronDown, ChevronUp, MoreHorizontal, Pause, Search, Trash, X } from "lucide-solid"
+import { ChevronDown, ChevronUp, MoreHorizontal, Pause, RotateCw, Search, Trash, X } from "lucide-solid"
 import Kbd from "./kbd"
 import BrandedEmptyState from "./branded-empty-state"
 import MessageBlock from "./message-block"
@@ -7,7 +7,7 @@ import { getMessageAnchorId, getMessageIdFromAnchorId } from "./message-anchors"
 import MessageTimeline, { buildTimelineSegments, type TimelineSegment } from "./message-timeline"
 import VirtualFollowList, { type VirtualFollowListApi, type VirtualFollowListState } from "./virtual-follow-list"
 import { useConfig } from "../stores/preferences"
-import { getSessionInfo } from "../stores/sessions"
+import { getSessionInfo, loadMessages } from "../stores/sessions"
 import { messageStoreBus } from "../stores/message-v2/bus"
 import { useI18n } from "../lib/i18n"
 import { useScrollCache } from "../lib/hooks/use-scroll-cache"
@@ -54,6 +54,7 @@ export default function MessageSection(props: MessageSectionProps) {
   const showMessageTimelinePreference = () => preferences().showMessageTimeline ?? true
   const showTimelineToolsPreference = () => preferences().showTimelineTools ?? true
   const holdLongAssistantRepliesEnabled = () => preferences().holdLongAssistantReplies ?? true
+  const [sessionHardReloading, setSessionHardReloading] = createSignal(false)
   const emptyStateVariant = () => props.emptyStateVariant ?? "messages"
   const store = createMemo<InstanceMessageStore>(() => messageStoreBus.getOrCreate(props.instanceId))
   const messageIds = createMemo(() => store().getSessionMessageIds(props.sessionId))
@@ -84,6 +85,21 @@ export default function MessageSection(props: MessageSectionProps) {
       return Boolean(timeInfo && (timeInfo.end === undefined || timeInfo.end === 0))
     })
   })
+
+  const handleSessionHardReload = async () => {
+    if (sessionHardReloading()) return
+
+    setSessionHardReloading(true)
+    try {
+      store().clearSession(props.sessionId)
+      await loadMessages(props.instanceId, props.sessionId, { force: true })
+      requestAnimationFrame(() => listApi()?.scrollToBottom({ immediate: true }))
+    } catch (error) {
+      showToastNotification({ message: "Failed to hard reload this session.", variant: "error" })
+    } finally {
+      setSessionHardReloading(false)
+    }
+  }
 
   const scrollCache = useScrollCache({
     instanceId: props.instanceId,
@@ -1295,6 +1311,16 @@ export default function MessageSection(props: MessageSectionProps) {
           registerState={(state) => setListState(state)}
           renderControls={(state, api) => (
             <div class="message-scroll-button-wrapper">
+              <button
+                type="button"
+                class="message-scroll-button"
+                onClick={() => void handleSessionHardReload()}
+                disabled={sessionHardReloading()}
+                aria-label="Hard reload this session"
+                title="Hard reload this session"
+              >
+                <RotateCw class={`message-scroll-icon w-4 h-4 ${sessionHardReloading() ? "animate-spin" : ""}`} aria-hidden="true" />
+              </button>
               <button
                 type="button"
                 class="message-scroll-button"

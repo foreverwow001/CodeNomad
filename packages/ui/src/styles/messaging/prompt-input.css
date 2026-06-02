@@ -4,6 +4,22 @@
   background-color: var(--surface-base);
 }
 
+.prompt-control-bar {
+  @apply flex items-center justify-center gap-2 px-3 py-2 border-t;
+  border-color: var(--border-base);
+  background-color: var(--surface-base);
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.prompt-control-bar .sidebar-selector {
+  @apply w-auto flex-none;
+}
+
+.prompt-control-bar [data-model-selector-control],
+.prompt-control-bar [data-thinking-selector-control] {
+  @apply w-auto;
+}
+
 .prompt-resize-handle {
   position: absolute;
   top: 0;

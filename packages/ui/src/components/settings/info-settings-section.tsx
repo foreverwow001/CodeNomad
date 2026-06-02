@@ -3,6 +3,7 @@ import { Info } from "lucide-solid"
 import { useI18n } from "../../lib/i18n"
 import { getServerMeta } from "../../lib/server-meta"
 import { runtimeEnv } from "../../lib/runtime-env"
+import { showConfirmDialog } from "../../stores/alerts"
 import type { ServerMeta } from "../../../../server/src/api-types"
 
 interface UserAgentData {
@@ -194,6 +195,17 @@ export const InfoSettingsSection: Component = () => {
     downloadTextFile(`codenomad-diagnostics-${ts}.txt`, report)
   }
 
+  const handlePwaHardReload = async () => {
+    const confirmed = await showConfirmDialog("Hard reload CodeNomad? Unsaved prompt text and open UI state may be lost.", {
+      title: "Hard reload app",
+      variant: "warning",
+      confirmLabel: "Reload app",
+      cancelLabel: "Cancel",
+    })
+    if (!confirmed) return
+    window.location.reload()
+  }
+
   return (
     <div class="settings-section-stack">
       <div class="settings-card">
@@ -327,6 +339,25 @@ export const InfoSettingsSection: Component = () => {
             {t("settings.info.diagnostics.copyFailed")}
           </div>
         )}
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <div>
+            <h3 class="settings-card-title">App hard reload</h3>
+            <p class="settings-card-subtitle">Reload the CodeNomad PWA when the whole app UI or connection state is stuck.</p>
+          </div>
+        </div>
+
+        <div class="settings-info-actions">
+          <button
+            type="button"
+            class="settings-pill-button"
+            onClick={() => void handlePwaHardReload()}
+          >
+            Hard reload app
+          </button>
+        </div>
       </div>
     </div>
   )

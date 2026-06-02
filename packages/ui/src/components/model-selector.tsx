@@ -14,6 +14,7 @@ interface ModelSelectorProps {
   sessionId: string
   currentModel: { providerId: string; modelId: string }
   onModelChange: (model: { providerId: string; modelId: string }) => Promise<void>
+  triggerVariant?: "default" | "prompt"
 }
 
 interface FlatModel extends Model {
@@ -45,6 +46,7 @@ const isProviderHeaderOption = (option: PickerOption): option is ProviderHeaderO
 export default function ModelSelector(props: ModelSelectorProps) {
   const { t } = useI18n()
   const instanceProviders = () => providers().get(props.instanceId) || []
+  const promptTrigger = () => props.triggerVariant === "prompt"
   const [isOpen, setIsOpen] = createSignal(false)
   const [manualAll, setManualAll] = createSignal(false)
   const [explicitFavorites, setExplicitFavorites] = createSignal(false)
@@ -359,13 +361,15 @@ export default function ModelSelector(props: ModelSelectorProps) {
           <Combobox.Input class="sr-only" data-model-selector />
           <Combobox.Trigger
             ref={triggerRef}
-            class="selector-trigger"
+            class={promptTrigger() ? "selector-trigger selector-trigger--prompt-model" : "selector-trigger"}
+            aria-label={t("modelSelector.trigger.primary", { model: currentModelValue()?.name ?? t("modelSelector.none") })}
+            title={currentModelValue() ? `${currentModelValue()!.providerId}/${currentModelValue()!.id}` : t("modelSelector.none")}
           >
             <div class="selector-trigger-label selector-trigger-label--stacked flex-1 min-w-0">
               <span class="selector-trigger-primary selector-trigger-primary--align-left">
                 {t("modelSelector.trigger.primary", { model: currentModelValue()?.name ?? t("modelSelector.none") })}
               </span>
-          {currentModelValue() && (
+          {currentModelValue() && !promptTrigger() && (
                 <span class="selector-trigger-secondary" dir="ltr">
                   {currentModelValue()!.providerId}/{currentModelValue()!.id}
                 </span>
