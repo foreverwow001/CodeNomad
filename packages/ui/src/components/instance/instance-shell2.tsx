@@ -38,6 +38,7 @@ import { serverApi } from "../../lib/api-client"
 import { loadBackgroundProcesses } from "../../stores/background-processes"
 import { BackgroundProcessOutputDialog } from "../background-process-output-dialog"
 import PromptInput from "../prompt-input"
+import PromptControlBar from "../prompt-control-bar"
 import { useI18n } from "../../lib/i18n"
 import { getPermissionQueueLength, getQuestionQueueLength } from "../../stores/instances"
 import SessionSidebar from "./shell/SessionSidebar"
@@ -1214,6 +1215,16 @@ const InstanceShell2: Component<InstanceShellProps> = (props) => {
                       escapeInDebounce={props.escapeInDebounce}
                       registerPromptInputApi={registerDraftPromptInputApi}
                     />
+                    <Show when={isPhoneLayout()}>
+                      <PromptControlBar
+                        instanceId={props.instance.id}
+                        sessionId="__new_session__"
+                        currentAgent={draftAgent()}
+                        currentModel={draftModel()}
+                        onAgentChange={handleDraftAgentChange}
+                        onModelChange={handleDraftModelChange}
+                      />
+                    </Show>
                   </div>
                 }
               >
@@ -1242,6 +1253,8 @@ const InstanceShell2: Component<InstanceShellProps> = (props) => {
                           onSidebarToggle={() => setLeftOpen(true)}
                           forceCompactStatusLayout={showEmbeddedSidebarToggle()}
                           isActive={isActive()}
+                          onAgentChange={props.handleSidebarAgentChange}
+                          onModelChange={props.handleSidebarModelChange}
                         />
                       </div>
                     )

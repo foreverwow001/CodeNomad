@@ -6,6 +6,7 @@ import MessageSection from "../message-section"
 import { messageStoreBus } from "../../stores/message-v2/bus"
 import PromptInput from "../prompt-input"
 import PromptAttachmentsBar from "../prompt-input/PromptAttachmentsBar"
+import PromptControlBar from "../prompt-control-bar"
 import { getAttachments, removeAttachment } from "../../stores/attachments"
 import { instances } from "../../stores/instances"
 import { loadMessages, sendMessage, forkSession, renameSession, isSessionMessagesLoading, getSessionMessagesLoadError, markSessionIdleSeen, setActiveParentSession, setActiveSession, runShellCommand, abortSession } from "../../stores/sessions"
@@ -40,6 +41,8 @@ interface SessionViewProps {
   forceCompactStatusLayout?: boolean
   isActive?: boolean
   registerSessionPromptApi?: (sessionId: string, api: PromptInputApi | null) => void
+  onAgentChange?: (sessionId: string, agent: string) => Promise<void>
+  onModelChange?: (sessionId: string, model: { providerId: string; modelId: string }) => Promise<void>
 }
 
 export const SessionView: Component<SessionViewProps> = (props) => {
@@ -291,6 +294,14 @@ export const SessionView: Component<SessionViewProps> = (props) => {
   async function handleRunShell(command: string) {
     await runShellCommand(props.instanceId, props.sessionId, command)
   }
+
+  async function handleAgentChange(agent: string) {
+    await props.onAgentChange?.(props.sessionId, agent)
+  }
+
+  async function handleModelChange(model: { providerId: string; modelId: string }) {
+    await props.onModelChange?.(props.sessionId, model)
+  }
  
   async function handleAbortSession() {
     const currentSession = session()
@@ -508,6 +519,16 @@ export const SessionView: Component<SessionViewProps> = (props) => {
               onAbortSession={handleAbortSession}
               registerPromptInputApi={registerPromptInputApi}
             />
+            <Show when={props.isPhoneLayout && props.isActive}>
+              <PromptControlBar
+                instanceId={props.instanceId}
+                sessionId={sessionAccessor().id}
+                currentAgent={sessionAccessor().agent}
+                currentModel={sessionAccessor().model}
+                onAgentChange={handleAgentChange}
+                onModelChange={handleModelChange}
+              />
+            </Show>
             </div>
           )
         }}

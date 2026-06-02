@@ -1,7 +1,7 @@
 import { Select } from "@kobalte/core/select"
 import { Show, createEffect, createMemo } from "solid-js"
 import { agents, fetchAgents, sessions } from "../stores/sessions"
-import { ChevronDown } from "lucide-solid"
+import { Bot, ChevronDown } from "lucide-solid"
 import { getSelectableAgentsForSession, type Agent } from "../types/session"
 import { useI18n } from "../lib/i18n"
 import { getLogger } from "../lib/logger"
@@ -13,11 +13,14 @@ interface AgentSelectorProps {
   sessionId: string
   currentAgent: string
   onAgentChange: (agent: string) => Promise<void>
+  triggerVariant?: "default" | "icon"
+  autoSelectFallback?: boolean
 }
 
 export default function AgentSelector(props: AgentSelectorProps) {
   const { t } = useI18n()
   const instanceAgents = () => agents().get(props.instanceId) || []
+  const compactTrigger = () => props.triggerVariant === "icon"
 
   const session = createMemo(() => {
     const instanceSessions = sessions().get(props.instanceId)
@@ -33,6 +36,7 @@ export default function AgentSelector(props: AgentSelectorProps) {
   })
 
   createEffect(() => {
+    if (props.autoSelectFallback === false) return
     const list = availableAgents()
     if (list.length === 0) return
     if (!list.some((agent) => agent.name === props.currentAgent)) {
@@ -86,9 +90,14 @@ export default function AgentSelector(props: AgentSelectorProps) {
       >
         <Select.Trigger
           data-agent-selector
-          class="selector-trigger"
+          class={compactTrigger() ? "selector-trigger selector-trigger--prompt-icon" : "selector-trigger"}
+          aria-label={t("agentSelector.trigger.primary", { agent: props.currentAgent || t("agentSelector.none") })}
+          title={t("agentSelector.trigger.primary", { agent: props.currentAgent || t("agentSelector.none") })}
         >
-          <div class="flex-1 min-w-0">
+          <Show when={compactTrigger()}>
+            <Bot class="w-4 h-4" aria-hidden="true" />
+          </Show>
+          <div class={compactTrigger() ? "sr-only" : "flex-1 min-w-0"}>
             <Select.Value<Agent>>
               {() => (
                 <div class="selector-trigger-label selector-trigger-label--stacked">
@@ -99,9 +108,11 @@ export default function AgentSelector(props: AgentSelectorProps) {
               )}
             </Select.Value>
           </div>
-          <Select.Icon class="selector-trigger-icon">
-            <ChevronDown class="w-3 h-3" />
-          </Select.Icon>
+          <Show when={!compactTrigger()}>
+            <Select.Icon class="selector-trigger-icon">
+              <ChevronDown class="w-3 h-3" />
+            </Select.Icon>
+          </Show>
         </Select.Trigger>
 
         <Select.Portal>
