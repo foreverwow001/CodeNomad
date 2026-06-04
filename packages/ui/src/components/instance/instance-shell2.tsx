@@ -44,6 +44,7 @@ import { getPermissionQueueLength, getQuestionQueueLength } from "../../stores/i
 import SessionSidebar from "./shell/SessionSidebar"
 import { useSessionSidebarRequests } from "./shell/useSessionSidebarRequests"
 import RightPanel from "./shell/right-panel/RightPanel"
+import GateAutoanswerStatusBadge from "../gate-autoanswer-status-badge"
 import { useDrawerChrome } from "./shell/useDrawerChrome"
 import { getRetrySeconds, getSessionIdleFadeClass, getSessionRetry, getSessionStatus, shouldShowSessionStatus } from "../../stores/session-status"
 import { Eye, Maximize2, MessageSquareText, Search, ShieldAlert } from "lucide-solid"
@@ -505,6 +506,7 @@ const InstanceShell2: Component<InstanceShellProps> = (props) => {
   const renderSessionHeaderIndicators = () => (
     <div class="flex items-center flex-wrap justify-center gap-2">
       {renderYoloModePill()}
+      <GateAutoanswerStatusBadge instanceId={props.instance.id} />
       <Show when={hasPendingRequests()} fallback={renderActiveSessionStatusPill()}>
         <PermissionNotificationBanner
           instanceId={props.instance.id}

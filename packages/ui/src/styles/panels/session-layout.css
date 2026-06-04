@@ -555,6 +555,39 @@ session-sidebar-controls .selector-trigger-primary {
   background-color: var(--accent-primary);
 }
 
+.status-indicator.session-gate-autoanswer {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.status-indicator.session-gate-autoanswer-manual {
+  background-color: rgba(239, 68, 68, 0.28);
+}
+
+.status-indicator.session-gate-autoanswer-manual .status-dot {
+  background-color: #ef4444;
+}
+
+.status-indicator.session-gate-autoanswer-semi-auto {
+  background-color: rgba(250, 204, 21, 0.28);
+}
+
+.status-indicator.session-gate-autoanswer-semi-auto .status-dot {
+  background-color: #facc15;
+}
+
+.status-indicator.session-gate-autoanswer-autopilot {
+  background-color: rgba(34, 197, 94, 0.28);
+}
+
+.status-indicator.session-gate-autoanswer-autopilot .status-dot {
+  background-color: #22c55e;
+}
+
+.status-indicator.session-gate-autoanswer-paused {
+  opacity: 0.72;
+}
+
 @media (max-width: 768px) {
   .session-list-container {
     min-width: 200px;
