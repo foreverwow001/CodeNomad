@@ -63,7 +63,7 @@ export default function GateAutoanswerStatusBadge(props: GateAutoanswerStatusBad
   const modeLabel = () => {
     const current = state()
     if (!current) return ""
-    if (current.paused) return `${current.mode} paused`
+    if (current.paused) return "paused"
     return current.mode
   }
 
@@ -84,7 +84,7 @@ export default function GateAutoanswerStatusBadge(props: GateAutoanswerStatusBad
           title={title()}
         >
           <span class="status-dot" />
-          Gate Auto: {modeLabel()}
+          {modeLabel()}
         </span>
       )}
     </Show>
